@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * COPYRIGHT(c) 2017 STMicroelectronics
+  * COPYRIGHT(c) 2018 STMicroelectronics
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -52,7 +52,7 @@
 /* USER CODE END Includes */
 
 extern DFSDM_Filter_HandleTypeDef hdfsdm1_filter0;
-extern DFSDM_Channel_HandleTypeDef hdfsdm1_channel0;
+extern DFSDM_Channel_HandleTypeDef hdfsdm1_channel2;
 
 /* USER CODE BEGIN Private defines */
 
