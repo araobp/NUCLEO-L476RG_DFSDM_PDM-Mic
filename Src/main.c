@@ -66,6 +66,8 @@ float FFT_mag[FFT_SampleNum/2] = {0.0f};
 float FFT_dB[FFT_SampleNum/2] = {0.0f};
 float FFT_frq[FFT_SampleNum/2] = {0.0f};
 float FFT_window[FFT_SampleNum] = {0.0f};
+
+bool output_result = false;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -113,7 +115,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_DFSDM1_Init();
   /* USER CODE BEGIN 2 */
-  printf("\r\n***** Program start! *****\r\n");
+  printf("\r\nPush USER button to output single-shot FFT\r\n");
   HAL_Delay(100);
     if (HAL_DFSDM_FilterRegularStart_DMA(&hdfsdm1_filter0, Buff, FFT_SampleNum) != HAL_OK)
     {
@@ -142,7 +144,6 @@ int main(void)
   {
         // Wait
         while (flag);
-
         // Raw data output
         /*for (uint32_t i = 0; i < FFT_SampleNum; i++)
              printf("%d\r\n", FFT_inp_int32[i]);*/
@@ -182,14 +183,18 @@ int main(void)
         arm_max_f32(FFT_mag, FFT_SampleNum / 2, &mag_max, &maxIndex);
         frq_max = *(FFT_frq + maxIndex);
 
-        printf("\r\nSampleRate=%d, frq_max = %.1f, mag_max = %f\r\n", (int)FFT_SampleRate, frq_max, mag_max);
-        for (uint32_t i = 0; i < FFT_SampleNum / 2; i++)
-        {
-            printf("%.1f\t%f\t%f\r\n", FFT_frq[i], FFT_mag[i], FFT_dB[i]);
+        if (output_result) {
+        	printf("\r\nSampleRate=%d, frq_max = %.1f, mag_max = %f\r\nFreq\tMag\tMag(dB)\r\n", (int)FFT_SampleRate, frq_max, mag_max);
+        	for (uint32_t i = 0; i < FFT_SampleNum / 2; i++)
+       		{
+       			printf("%.1f\t%f\t%f\r\n", FFT_frq[i], FFT_mag[i], FFT_dB[i]);
+       		}
+        	output_result = false;
+        	HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
         }
 
-        //while(1);
-        HAL_Delay(2000);
+        // HAL_Delay(2000);
+
         flag = true;        // <- Continuous transformation
   /* USER CODE END WHILE */
 
@@ -311,6 +316,18 @@ int _write(int file, char *ptr, int len)
 {
     HAL_UART_Transmit(&huart2, (uint8_t *)ptr, (uint16_t)len, 0xFFFFFFFF);
     return len;
+}
+
+/**
+ * @brief  GPIO External Interrupt callback
+ * @param  GPIO_Pin
+ * @retval None
+ */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+  if (GPIO_Pin == GPIO_PIN_13) {  // User button (blue tactile switch)
+	  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+	  output_result = true;
+  }
 }
 /* USER CODE END 4 */
 
